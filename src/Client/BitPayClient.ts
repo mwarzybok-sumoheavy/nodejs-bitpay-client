@@ -62,7 +62,7 @@ export class BitPayClient {
         headers: headers
       });
 
-      const jsonObject = await response.json() as object;
+      const jsonObject = (await response.json()) as object;
 
       LoggerProvider.getLogger().logResponse(method, fullUrl, JSON.stringify(jsonObject));
 
@@ -101,7 +101,7 @@ export class BitPayClient {
         body: formData
       });
 
-      const jsonObject = await response.json() as object;
+      const jsonObject = (await response.json()) as object;
 
       LoggerProvider.getLogger().logResponse(method, fullUrl, JSON.stringify(jsonObject));
 
@@ -141,7 +141,7 @@ export class BitPayClient {
         body: formData
       });
 
-      const jsonObject = await response.json() as object;
+      const jsonObject = (await response.json()) as object;
 
       LoggerProvider.getLogger().logResponse(method, fullUrl, JSON.stringify(jsonObject));
 
@@ -179,7 +179,7 @@ export class BitPayClient {
         headers: headers
       });
 
-      const jsonObject = await response.json() as object;
+      const jsonObject = (await response.json()) as object;
 
       LoggerProvider.getLogger().logResponse(method, fullUrl, JSON.stringify(jsonObject));
 

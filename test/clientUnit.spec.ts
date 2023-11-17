@@ -72,8 +72,8 @@ import * as invalidSignature from './json/invalidSignature.json';
 import { isEqual } from 'lodash';
 import * as BitPaySDK from '../src/index';
 import BitPayApiException from '../src/Exceptions/BitPayApiException';
-import {HttpRequestResolverExtras} from "msw/lib/core/handlers/HttpHandler";
-import {ResponseResolverInfo} from "msw/lib/core/handlers/RequestHandler";
+import { HttpRequestResolverExtras } from 'msw/lib/core/handlers/HttpHandler';
+import { ResponseResolverInfo } from 'msw/lib/core/handlers/RequestHandler';
 
 let client;
 let oneMonthAgo;
@@ -135,28 +135,28 @@ describe('BitPaySDK.Client', () => {
   }
 
   function validateMerchantTokenInUrl(req: Request) {
-    const token = getParameterFromUrl(req.url, "token");
+    const token = getParameterFromUrl(req.url, 'token');
     if (token !== merchantToken) {
       throw new Error('Missing/wrong token');
     }
   }
 
   function validatePayoutTokenInUrl(req: Request) {
-    const token = getParameterFromUrl(req.url, "token");
+    const token = getParameterFromUrl(req.url, 'token');
 
     if (token !== payoutToken) {
       throw new Error('Missing/wrong token');
     }
   }
 
-  function validateMerchantTokenInFormData(json: {token?: string}) {
+  function validateMerchantTokenInFormData(json: { token?: string }) {
     const token = json.token;
     if (token !== merchantToken) {
       throw new Error('Missing/wrong token');
     }
   }
 
-  function validatePayoutTokenInFormData(json: {token?: string}) {
+  function validatePayoutTokenInFormData(json: { token?: string }) {
     const token = json.token;
     if (token !== payoutToken) {
       throw new Error('Missing/wrong token');
@@ -210,12 +210,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should throws BitPayException for invalid signature', async () => {
       server.use(
-        http.get(host + '/invoices/1234', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInUrl(responseResolver.request);
+        http.get(
+          host + '/invoices/1234',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(invalidSignature));
-        })
+            return new Response(JSON.stringify(invalidSignature));
+          }
+        )
       );
 
       await expect(client.getInvoice('1234')).rejects.toBeInstanceOf(BitPayApiException);
@@ -290,13 +293,16 @@ describe('BitPaySDK.Client', () => {
 
     it('should create Bill', async () => {
       server.use(
-        http.post(host + '/bills', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validateRequest(json, createBillRequestMock);
+        http.post(
+          host + '/bills',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validateRequest(json, createBillRequestMock);
 
-          return new Response(JSON.stringify(createBillResponseMock));
-        })
+            return new Response(JSON.stringify(createBillResponseMock));
+          }
+        )
       );
 
       const result = await client.createBill(getBill(), Facade.Merchant, true);
@@ -306,12 +312,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should return Bill', async () => {
       server.use(
-        http.get(host + '/bills/3Zpmji8bRKxWJo2NJbWX5H', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateMerchantTokenInUrl(responseResolver.request);
-          validateSignatureRequest(responseResolver.request);
+        http.get(
+          host + '/bills/3Zpmji8bRKxWJo2NJbWX5H',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateMerchantTokenInUrl(responseResolver.request);
+            validateSignatureRequest(responseResolver.request);
 
-          return new Response(JSON.stringify(createBillResponseMock));
-        })
+            return new Response(JSON.stringify(createBillResponseMock));
+          }
+        )
       );
 
       const result = await client.getBill('3Zpmji8bRKxWJo2NJbWX5H', Facade.Merchant, true);
@@ -323,12 +332,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should return Bills', async () => {
       server.use(
-        http.get(host + '/bills', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateMerchantTokenInUrl(responseResolver.request);
-          validateSignatureRequest(responseResolver.request);
+        http.get(
+          host + '/bills',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateMerchantTokenInUrl(responseResolver.request);
+            validateSignatureRequest(responseResolver.request);
 
-          return new Response(JSON.stringify(getBillsResponseMock));
-        })
+            return new Response(JSON.stringify(getBillsResponseMock));
+          }
+        )
       );
 
       const result = await client.getBills();
@@ -340,17 +352,20 @@ describe('BitPaySDK.Client', () => {
 
     it('should return Bills by status', async () => {
       server.use(
-        http.get(host + '/bills', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateMerchantTokenInUrl(responseResolver.request);
-          validateSignatureRequest(responseResolver.request);
+        http.get(
+          host + '/bills',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateMerchantTokenInUrl(responseResolver.request);
+            validateSignatureRequest(responseResolver.request);
 
-          const token = getParameterFromUrl(responseResolver.request.url, "status");
-          if (token !== 'draft') {
-            throw new Error('Wrong parameter');
+            const token = getParameterFromUrl(responseResolver.request.url, 'status');
+            if (token !== 'draft') {
+              throw new Error('Wrong parameter');
+            }
+
+            return new Response(JSON.stringify(getBillsResponseMock));
           }
-
-          return new Response(JSON.stringify(getBillsResponseMock));
-        })
+        )
       );
 
       const result = await client.getBills('draft');
@@ -362,14 +377,17 @@ describe('BitPaySDK.Client', () => {
 
     it('should update Bill', async () => {
       server.use(
-        http.put(host + '/bills/3Zpmji8bRKxWJo2NJbWX5H', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as {token?: string};
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInFormData(json);
-          validateRequest(json, updateBillRequestMock);
+        http.put(
+          host + '/bills/3Zpmji8bRKxWJo2NJbWX5H',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as { token?: string };
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInFormData(json);
+            validateRequest(json, updateBillRequestMock);
 
-          return new Response(JSON.stringify(updateBillResponseMock));
-        })
+            return new Response(JSON.stringify(updateBillResponseMock));
+          }
+        )
       );
 
       const bill = getBill();
@@ -392,18 +410,21 @@ describe('BitPaySDK.Client', () => {
       const token = '6EBQR37MgDJPfEiLY3jtRq7eTP2aodR5V5wmXyyZhru5FM5yF4RCGKYQtnT7nhwHjA';
 
       server.use(
-        http.post(host + '/bills/3Zpmji8bRKxWJo2NJbWX5H/deliveries', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as {token?: string};
+        http.post(
+          host + '/bills/3Zpmji8bRKxWJo2NJbWX5H/deliveries',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as { token?: string };
 
-          validateSignatureRequest(responseResolver.request);
-          validateRequest(json, deliverBillRequestMock);
+            validateSignatureRequest(responseResolver.request);
+            validateRequest(json, deliverBillRequestMock);
 
-          if (json.token !== token) {
-            throw new Error('Wrong token');
+            if (json.token !== token) {
+              throw new Error('Wrong token');
+            }
+
+            return new Response(JSON.stringify(deliverBillResponseMock));
           }
-
-          return new Response(JSON.stringify(deliverBillResponseMock));
-        })
+        )
       );
 
       const result = await client.deliverBill('3Zpmji8bRKxWJo2NJbWX5H', token);
@@ -414,7 +435,6 @@ describe('BitPaySDK.Client', () => {
 
   describe('Currency', () => {
     it('should get currency info', async () => {
-
       server.use(
         http.get(host + '/currencies', () => {
           return new Response(JSON.stringify(getCurrenciesResponseMock));
@@ -464,14 +484,17 @@ describe('BitPaySDK.Client', () => {
 
     it('should create invoice', async () => {
       server.use(
-        http.post(host + '/invoices', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInFormData(json);
-          validateRequest(json, createInvoiceRequestMock);
+        http.post(
+          host + '/invoices',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInFormData(json);
+            validateRequest(json, createInvoiceRequestMock);
 
-          return new Response(JSON.stringify(createInvoiceResponseMcok));
-        })
+            return new Response(JSON.stringify(createInvoiceResponseMcok));
+          }
+        )
       );
 
       const result = await client.createInvoice(getInvoiceExample(), Facade.Merchant, true);
@@ -483,12 +506,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should get invoice', async () => {
       server.use(
-        http.get(host + '/invoices/G3viJEJgE8Jk2oekSdgT2A', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInUrl(responseResolver.request);
+        http.get(
+          host + '/invoices/G3viJEJgE8Jk2oekSdgT2A',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(getInvoiceResponseMock));
-        })
+            return new Response(JSON.stringify(getInvoiceResponseMock));
+          }
+        )
       );
 
       const results = await client.getInvoice('G3viJEJgE8Jk2oekSdgT2A');
@@ -499,12 +525,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should get invoice by guid', async () => {
       server.use(
-        http.get(host + '/invoices/guid/payment1234', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInUrl(responseResolver.request);
+        http.get(
+          host + '/invoices/guid/payment1234',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(getInvoiceResponseMock));
-        })
+            return new Response(JSON.stringify(getInvoiceResponseMock));
+          }
+        )
       );
 
       const results = await client.getInvoiceByGuid('payment1234');
@@ -513,21 +542,24 @@ describe('BitPaySDK.Client', () => {
 
     it('should get invoices', async () => {
       server.use(
-        http.get(host + '/invoices', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const request: Request = responseResolver.request;
-          validateSignatureRequest(request);
-          validateMerchantTokenInUrl(responseResolver.request);
+        http.get(
+          host + '/invoices',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const request: Request = responseResolver.request;
+            validateSignatureRequest(request);
+            validateMerchantTokenInUrl(responseResolver.request);
 
-          const dateStart = getParameterFromUrl(request.url, "dateStart");
-          const dateEnd = getParameterFromUrl(request.url, "dateEnd");
-          const status = getParameterFromUrl(request.url, "status");
+            const dateStart = getParameterFromUrl(request.url, 'dateStart');
+            const dateEnd = getParameterFromUrl(request.url, 'dateEnd');
+            const status = getParameterFromUrl(request.url, 'status');
 
-          if (dateStart !== '2021-05-10' || dateEnd !== '2021-05-12' || status !== 'complete') {
-            throw new Error('Wrong parameters');
+            if (dateStart !== '2021-05-10' || dateEnd !== '2021-05-12' || status !== 'complete') {
+              throw new Error('Wrong parameters');
+            }
+
+            return new Response(JSON.stringify(getInvoicesResponseMock));
           }
-
-          return new Response(JSON.stringify(getInvoicesResponseMock));
-        })
+        )
       );
 
       const params = {
@@ -542,14 +574,17 @@ describe('BitPaySDK.Client', () => {
 
     it('should pay invoice', async () => {
       server.use(
-        http.put(host + '/invoices/pay/G3viJEJgE8Jk2oekSdgT2A', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInFormData(json);
-          validateRequest(json, payInvoiceRequestMock);
+        http.put(
+          host + '/invoices/pay/G3viJEJgE8Jk2oekSdgT2A',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInFormData(json);
+            validateRequest(json, payInvoiceRequestMock);
 
-          return new Response(JSON.stringify(payInvoiceResponseMock));
-        })
+            return new Response(JSON.stringify(payInvoiceResponseMock));
+          }
+        )
       );
 
       const result = await client.payInvoice('G3viJEJgE8Jk2oekSdgT2A', 'complete');
@@ -558,12 +593,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should cancel invoice', async () => {
       server.use(
-        http.delete(host + '/invoices/Hpqc63wvE1ZjzeeH4kEycF', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInUrl(responseResolver.request);
+        http.delete(
+          host + '/invoices/Hpqc63wvE1ZjzeeH4kEycF',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(cancelInvoiceSuccessResponseMock));
-        })
+            return new Response(JSON.stringify(cancelInvoiceSuccessResponseMock));
+          }
+        )
       );
 
       const result = await client.cancelInvoice('Hpqc63wvE1ZjzeeH4kEycF');
@@ -572,12 +610,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should cancel invoice by guid', async () => {
       server.use(
-        http.delete(host + '/invoices/guid/payment1234', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInUrl(responseResolver.request);
+        http.delete(
+          host + '/invoices/guid/payment1234',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(cancelInvoiceSuccessResponseMock));
-        })
+            return new Response(JSON.stringify(cancelInvoiceSuccessResponseMock));
+          }
+        )
       );
 
       const result = await client.cancelInvoiceByGuid('payment1234');
@@ -586,13 +627,16 @@ describe('BitPaySDK.Client', () => {
 
     it('should send invoice webhook to be resent', async () => {
       server.use(
-        http.post(host + '/invoices/Hpqc63wvE1ZjzeeH4kEycF/notifications', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateMerchantTokenInFormData(json);
-          validateSignatureRequest(responseResolver.request);
+        http.post(
+          host + '/invoices/Hpqc63wvE1ZjzeeH4kEycF/notifications',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateMerchantTokenInFormData(json);
+            validateSignatureRequest(responseResolver.request);
 
-          return new Response(JSON.stringify(invoiceWebhookResponseMock));
-        })
+            return new Response(JSON.stringify(invoiceWebhookResponseMock));
+          }
+        )
       );
 
       const result = await client.requestInvoiceWebhookToBeResent('Hpqc63wvE1ZjzeeH4kEycF');
@@ -601,12 +645,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should retrieve an invoice event token', async () => {
       server.use(
-        http.get(host + '/invoices/GZRP3zgNHTDf8F5BmdChKz/events', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInUrl(responseResolver.request);
+        http.get(
+          host + '/invoices/GZRP3zgNHTDf8F5BmdChKz/events',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(getInvoiceEventTokenMock));
-        })
+            return new Response(JSON.stringify(getInvoiceEventTokenMock));
+          }
+        )
       );
 
       const results = await client.getInvoiceEventToken('GZRP3zgNHTDf8F5BmdChKz');
@@ -617,20 +664,23 @@ describe('BitPaySDK.Client', () => {
   describe('Ledgers', () => {
     it('should get ledger entries', async () => {
       server.use(
-        http.get(host + '/ledgers/USD', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const request: Request = responseResolver.request;
-          validateSignatureRequest(request);
-          validateMerchantTokenInUrl(request);
+        http.get(
+          host + '/ledgers/USD',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const request: Request = responseResolver.request;
+            validateSignatureRequest(request);
+            validateMerchantTokenInUrl(request);
 
-          const dateStart = getParameterFromUrl(request.url, 'startDate');
-          const dateEnd = getParameterFromUrl(request.url,'endDate');
+            const dateStart = getParameterFromUrl(request.url, 'startDate');
+            const dateEnd = getParameterFromUrl(request.url, 'endDate');
 
-          if (dateStart !== '2021-05-10' || dateEnd !== '2021-05-31') {
-            throw new Error('Wrong parameters');
+            if (dateStart !== '2021-05-10' || dateEnd !== '2021-05-31') {
+              throw new Error('Wrong parameters');
+            }
+
+            return new Response(JSON.stringify(getLedgerEntriesResponseMock));
           }
-
-          return new Response(JSON.stringify(getLedgerEntriesResponseMock));
-        })
+        )
       );
 
       const results = await client.getLedgerEntries(
@@ -646,12 +696,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should get ledgers', async () => {
       server.use(
-        http.get(host + '/ledgers', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInUrl(responseResolver.request);
+        http.get(
+          host + '/ledgers',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(getLedgersResponseMock));
-        })
+            return new Response(JSON.stringify(getLedgersResponseMock));
+          }
+        )
       );
 
       const results = await client.getLedgers();
@@ -667,13 +720,16 @@ describe('BitPaySDK.Client', () => {
   describe('Payout', () => {
     it('should submit payout', async () => {
       server.use(
-        http.post(host + '/payouts', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validateRequest(json, createPayoutRequestMock);
+        http.post(
+          host + '/payouts',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validateRequest(json, createPayoutRequestMock);
 
-          return new Response(JSON.stringify(createPayoutResponseMock));
-        })
+            return new Response(JSON.stringify(createPayoutResponseMock));
+          }
+        )
       );
 
       const payout = new Payout(10, 'USD', 'GBP');
@@ -693,12 +749,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should get payout', async () => {
       server.use(
-        http.get(host + '/payouts/JMwv8wQCXANoU2ZZQ9a9GH', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validatePayoutTokenInUrl(responseResolver.request);
+        http.get(
+          host + '/payouts/JMwv8wQCXANoU2ZZQ9a9GH',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validatePayoutTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(getPayoutResponseMock));
-        })
+            return new Response(JSON.stringify(getPayoutResponseMock));
+          }
+        )
       );
 
       const results = await client.getPayout('JMwv8wQCXANoU2ZZQ9a9GH');
@@ -710,20 +769,23 @@ describe('BitPaySDK.Client', () => {
 
     it('should get payouts', async () => {
       server.use(
-        http.get(host + '/payouts', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const request: Request = responseResolver.request;
-          validateSignatureRequest(request);
-          validatePayoutTokenInUrl(request);
+        http.get(
+          host + '/payouts',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const request: Request = responseResolver.request;
+            validateSignatureRequest(request);
+            validatePayoutTokenInUrl(request);
 
-          const dateStart = getParameterFromUrl(request.url, "startDate");
-          const dateEnd = getParameterFromUrl(request.url, "endDate");
+            const dateStart = getParameterFromUrl(request.url, 'startDate');
+            const dateEnd = getParameterFromUrl(request.url, 'endDate');
 
-          if (dateStart !== '2021-05-27' || dateEnd !== '2021-05-31') {
-            throw new Error('Wrong parameters');
+            if (dateStart !== '2021-05-27' || dateEnd !== '2021-05-31') {
+              throw new Error('Wrong parameters');
+            }
+
+            return new Response(JSON.stringify(getPayoutsResponseMock));
           }
-
-          return new Response(JSON.stringify(getPayoutsResponseMock));
-        })
+        )
       );
 
       const params = {
@@ -740,12 +802,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should cancel payout', async () => {
       server.use(
-        http.delete(host + '/payouts/KMXZeQigXG6T5abzCJmTcH', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validatePayoutTokenInUrl(responseResolver.request);
+        http.delete(
+          host + '/payouts/KMXZeQigXG6T5abzCJmTcH',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validatePayoutTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(cancelPayoutResponseMock));
-        })
+            return new Response(JSON.stringify(cancelPayoutResponseMock));
+          }
+        )
       );
 
       const results = await client.cancelPayout('KMXZeQigXG6T5abzCJmTcH');
@@ -755,13 +820,16 @@ describe('BitPaySDK.Client', () => {
 
     it('should submit payouts', async () => {
       server.use(
-        http.post(host + '/payouts/group', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validateRequest(json, createPayoutGroupRequestMock);
+        http.post(
+          host + '/payouts/group',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validateRequest(json, createPayoutGroupRequestMock);
 
-          return new Response(JSON.stringify(createPayoutGroupResponseMock));
-        })
+            return new Response(JSON.stringify(createPayoutGroupResponseMock));
+          }
+        )
       );
 
       const notificationURL = 'https://yournotiticationURL.com/wed3sa0wx1rz5bg0bv97851eqx';
@@ -790,10 +858,13 @@ describe('BitPaySDK.Client', () => {
       const groupId = '12345';
 
       server.use(
-        http.delete(host + '/payouts/group/' + groupId, async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          return new Response(JSON.stringify(cancelPayoutGroupResponseMock));
-        })
+        http.delete(
+          host + '/payouts/group/' + groupId,
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            return new Response(JSON.stringify(cancelPayoutGroupResponseMock));
+          }
+        )
       );
 
       const result: PayoutGroupInterface = await client.cancelPayouts(groupId);
@@ -809,14 +880,17 @@ describe('BitPaySDK.Client', () => {
 
     it('should send request payout notification', async () => {
       server.use(
-        http.post(host + '/payouts/JMwv8wQCXANoU2ZZQ9a9GH/notifications', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validatePayoutTokenInFormData(json);
-          validateRequest(json, sendPayoutNotificationRequestMock);
+        http.post(
+          host + '/payouts/JMwv8wQCXANoU2ZZQ9a9GH/notifications',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validatePayoutTokenInFormData(json);
+            validateRequest(json, sendPayoutNotificationRequestMock);
 
-          return new Response(JSON.stringify(sendPayoutNotificationResponseMock));
-        })
+            return new Response(JSON.stringify(sendPayoutNotificationResponseMock));
+          }
+        )
       );
 
       const results = await client.requestPayoutNotification('JMwv8wQCXANoU2ZZQ9a9GH');
@@ -828,13 +902,16 @@ describe('BitPaySDK.Client', () => {
   describe('Payout Recipient', () => {
     it('should submit payout recipients', async () => {
       server.use(
-        http.post(host + '/recipients', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validateRequest(json, submitPayoutRecipientsRequestMock);
+        http.post(
+          host + '/recipients',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validateRequest(json, submitPayoutRecipientsRequestMock);
 
-          return new Response(JSON.stringify(submitPayoutRecipientsResponseMock));
-        })
+            return new Response(JSON.stringify(submitPayoutRecipientsResponseMock));
+          }
+        )
       );
 
       const payoutRecipient1 = new PayoutRecipient('alice@email.com', 'Alice', 'https://someurl.com');
@@ -851,18 +928,21 @@ describe('BitPaySDK.Client', () => {
 
     it('should get payout recipients by status', async () => {
       server.use(
-        http.get(host + '/recipients', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const request: Request = responseResolver.request;
-          validateSignatureRequest(request);
-          validatePayoutTokenInUrl(request);
+        http.get(
+          host + '/recipients',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const request: Request = responseResolver.request;
+            validateSignatureRequest(request);
+            validatePayoutTokenInUrl(request);
 
-          const status = getParameterFromUrl(request.url, 'status');
-          if (status !== 'invited') {
-            throw new Error('Wrong parameters');
+            const status = getParameterFromUrl(request.url, 'status');
+            if (status !== 'invited') {
+              throw new Error('Wrong parameters');
+            }
+
+            return new Response(JSON.stringify(getPayoutRecipientsResponseMock));
           }
-
-          return new Response(JSON.stringify(getPayoutRecipientsResponseMock));
-        })
+        )
       );
 
       const params = {
@@ -879,12 +959,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should get payout recipient', async () => {
       server.use(
-        http.get(host + '/recipients/JA4cEtmBxCp5cybtnh1rds', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validatePayoutTokenInUrl(responseResolver.request);
+        http.get(
+          host + '/recipients/JA4cEtmBxCp5cybtnh1rds',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validatePayoutTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(getPayoutRecipientResponseMock));
-        })
+            return new Response(JSON.stringify(getPayoutRecipientResponseMock));
+          }
+        )
       );
 
       const result = await client.getPayoutRecipient('JA4cEtmBxCp5cybtnh1rds');
@@ -897,20 +980,23 @@ describe('BitPaySDK.Client', () => {
 
     it('should update payout recipient', async () => {
       server.use(
-        http.put(host + '/recipients/X3icwc4tE8KJ5hEPNPpDXW', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validatePayoutTokenInFormData(json);
-          validateRequest(json, {
-            email: 'bob@email.com',
-            label: 'Bob123',
-            notificationURL: 'https://someurl.com',
-            token: 'somePayoutToken',
-            guid: 'ee26b5e0-9185-493e-bc12-e846d5fcf07c'
-          });
+        http.put(
+          host + '/recipients/X3icwc4tE8KJ5hEPNPpDXW',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validatePayoutTokenInFormData(json);
+            validateRequest(json, {
+              email: 'bob@email.com',
+              label: 'Bob123',
+              notificationURL: 'https://someurl.com',
+              token: 'somePayoutToken',
+              guid: 'ee26b5e0-9185-493e-bc12-e846d5fcf07c'
+            });
 
-          return new Response(JSON.stringify(updatePayoutRecipientResponseMock));
-        })
+            return new Response(JSON.stringify(updatePayoutRecipientResponseMock));
+          }
+        )
       );
 
       const payoutRecipient = new PayoutRecipient('bob@email.com', 'Bob123', 'https://someurl.com');
@@ -921,12 +1007,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should delete payout recipient', async () => {
       server.use(
-        http.delete(host + '/recipients/X3icwc4tE8KJ5hEPNPpDXW', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validatePayoutTokenInUrl(responseResolver.request);
+        http.delete(
+          host + '/recipients/X3icwc4tE8KJ5hEPNPpDXW',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validatePayoutTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(deletePayoutRecipientResponseMock));
-        })
+            return new Response(JSON.stringify(deletePayoutRecipientResponseMock));
+          }
+        )
       );
 
       const result = await client.deletePayoutRecipient('X3icwc4tE8KJ5hEPNPpDXW');
@@ -972,18 +1061,21 @@ describe('BitPaySDK.Client', () => {
   describe('Refund', () => {
     it('should create refund', async () => {
       server.use(
-        http.post(host + '/refunds', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validateRequest(json, {
-            token: 'someMerchantToken',
-            invoiceId: 'Hpqc63wvE1ZjzeeH4kEycF',
-            amount: 10,
-            guid: 'ee26b5e0-9185-493e-bc12-e846d5fcf07c'
-          });
+        http.post(
+          host + '/refunds',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validateRequest(json, {
+              token: 'someMerchantToken',
+              invoiceId: 'Hpqc63wvE1ZjzeeH4kEycF',
+              amount: 10,
+              guid: 'ee26b5e0-9185-493e-bc12-e846d5fcf07c'
+            });
 
-          return new Response(JSON.stringify(createRefundResponseMock));
-        })
+            return new Response(JSON.stringify(createRefundResponseMock));
+          }
+        )
       );
 
       const refund = new Refund(10.0, 'Hpqc63wvE1ZjzeeH4kEycF', 'token');
@@ -996,12 +1088,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should get refund', async () => {
       server.use(
-        http.get(host + '/refunds/WoE46gSLkJQS48RJEiNw3L', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateMerchantTokenInUrl(responseResolver.request);
-          validateSignatureRequest(responseResolver.request);
+        http.get(
+          host + '/refunds/WoE46gSLkJQS48RJEiNw3L',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateMerchantTokenInUrl(responseResolver.request);
+            validateSignatureRequest(responseResolver.request);
 
-          return new Response(JSON.stringify(createRefundResponseMock));
-        })
+            return new Response(JSON.stringify(createRefundResponseMock));
+          }
+        )
       );
 
       const result = await client.getRefund('WoE46gSLkJQS48RJEiNw3L');
@@ -1012,12 +1107,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should get refund by guid', async () => {
       server.use(
-        http.get(host + '/refunds/guid/ee26b5e0-9185-493e-bc12-e846d5fcf07c', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateMerchantTokenInUrl(responseResolver.request);
-          validateSignatureRequest(responseResolver.request);
+        http.get(
+          host + '/refunds/guid/ee26b5e0-9185-493e-bc12-e846d5fcf07c',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateMerchantTokenInUrl(responseResolver.request);
+            validateSignatureRequest(responseResolver.request);
 
-          return new Response(JSON.stringify(createRefundResponseMock));
-        })
+            return new Response(JSON.stringify(createRefundResponseMock));
+          }
+        )
       );
 
       const result = await client.getRefundByGuid('ee26b5e0-9185-493e-bc12-e846d5fcf07c');
@@ -1028,17 +1126,20 @@ describe('BitPaySDK.Client', () => {
 
     it('should get refunds by invoice id', async () => {
       server.use(
-        http.get(host + '/refunds', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const request: Request = responseResolver.request;
-          validateMerchantTokenInUrl(request);
-          validateSignatureRequest(request);
+        http.get(
+          host + '/refunds',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const request: Request = responseResolver.request;
+            validateMerchantTokenInUrl(request);
+            validateSignatureRequest(request);
 
-          if (getParameterFromUrl(request.url, 'invoiceId') !== 'Hpqc63wvE1ZjzeeH4kEycF') {
-            throw new Error('Missing invoiceId');
+            if (getParameterFromUrl(request.url, 'invoiceId') !== 'Hpqc63wvE1ZjzeeH4kEycF') {
+              throw new Error('Missing invoiceId');
+            }
+
+            return new Response(JSON.stringify(createRefundResponseMock));
           }
-
-          return new Response(JSON.stringify(createRefundResponseMock));
-        })
+        )
       );
 
       const result = await client.getRefunds('Hpqc63wvE1ZjzeeH4kEycF');
@@ -1049,14 +1150,17 @@ describe('BitPaySDK.Client', () => {
 
     it('should update refund', async () => {
       server.use(
-        http.put(host + '/refunds/WoE46gSLkJQS48RJEiNw3L', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInFormData(json);
-          validateRequest(json, updateRefundRequestMock);
+        http.put(
+          host + '/refunds/WoE46gSLkJQS48RJEiNw3L',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInFormData(json);
+            validateRequest(json, updateRefundRequestMock);
 
-          return new Response(JSON.stringify(updateRefundResponseMock));
-        })
+            return new Response(JSON.stringify(updateRefundResponseMock));
+          }
+        )
       );
 
       const result = await client.updateRefund('WoE46gSLkJQS48RJEiNw3L', 'created');
@@ -1067,14 +1171,17 @@ describe('BitPaySDK.Client', () => {
 
     it('should update refund by guid', async () => {
       server.use(
-        http.put(host + '/refunds/guid/ee26b5e0-9185-493e-bc12-e846d5fcf07c', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInFormData(json);
-          validateRequest(json, updateRefundRequestMock);
+        http.put(
+          host + '/refunds/guid/ee26b5e0-9185-493e-bc12-e846d5fcf07c',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInFormData(json);
+            validateRequest(json, updateRefundRequestMock);
 
-          return new Response(JSON.stringify(updateRefundResponseMock));
-        })
+            return new Response(JSON.stringify(updateRefundResponseMock));
+          }
+        )
       );
 
       const result = await client.updateRefundByGuid('ee26b5e0-9185-493e-bc12-e846d5fcf07c', 'created');
@@ -1085,14 +1192,17 @@ describe('BitPaySDK.Client', () => {
 
     it('should send refund notification', async () => {
       server.use(
-        http.post(host + '/refunds/WoE46gSLkJQS48RJEiNw3L/notifications', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const json = await responseResolver.request.json() as object;
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInFormData(json);
-          validateRequest(json, sendRefundNotificationRequestMock);
+        http.post(
+          host + '/refunds/WoE46gSLkJQS48RJEiNw3L/notifications',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const json = (await responseResolver.request.json()) as object;
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInFormData(json);
+            validateRequest(json, sendRefundNotificationRequestMock);
 
-          return new Response(JSON.stringify(sendRefundNotificationResponseMock));
-        })
+            return new Response(JSON.stringify(sendRefundNotificationResponseMock));
+          }
+        )
       );
 
       const result = await client.sendRefundNotification('WoE46gSLkJQS48RJEiNw3L', 'created');
@@ -1101,12 +1211,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should cancel refund', async () => {
       server.use(
-        http.delete(host + '/refunds/WoE46gSLkJQS48RJEiNw3L', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInUrl(responseResolver.request);
+        http.delete(
+          host + '/refunds/WoE46gSLkJQS48RJEiNw3L',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(cancelRefundResponseMock));
-        })
+            return new Response(JSON.stringify(cancelRefundResponseMock));
+          }
+        )
       );
 
       const result = await client.cancelRefund('WoE46gSLkJQS48RJEiNw3L');
@@ -1116,12 +1229,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should cancel refund by guid', async () => {
       server.use(
-        http.delete(host + '/refunds/guid/WoE46gSLkJQS48RJEiNw3L', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateSignatureRequest(responseResolver.request);
-          validateMerchantTokenInUrl(responseResolver.request);
+        http.delete(
+          host + '/refunds/guid/WoE46gSLkJQS48RJEiNw3L',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateSignatureRequest(responseResolver.request);
+            validateMerchantTokenInUrl(responseResolver.request);
 
-          return new Response(JSON.stringify(cancelRefundResponseMock));
-        })
+            return new Response(JSON.stringify(cancelRefundResponseMock));
+          }
+        )
       );
 
       const result = await client.cancelRefundByGuid('WoE46gSLkJQS48RJEiNw3L');
@@ -1133,23 +1249,26 @@ describe('BitPaySDK.Client', () => {
   describe('Settlement', () => {
     it('should get settlements', async () => {
       server.use(
-        http.get(host + '/settlements', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          const request = responseResolver.request;
-          if (
-            getParameterFromUrl(request.url, 'startDate') !== '2021-05-10' ||
-            getParameterFromUrl(request.url, 'endDate') !== '2021-05-12' ||
-            getParameterFromUrl(request.url, 'status') !== 'processing' ||
-            getParameterFromUrl(request.url, 'limit') !== '100' ||
-            getParameterFromUrl(request.url, 'offset') !== '0'
-          ) {
-            throw new Error('Wrong request parameters');
+        http.get(
+          host + '/settlements',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            const request = responseResolver.request;
+            if (
+              getParameterFromUrl(request.url, 'startDate') !== '2021-05-10' ||
+              getParameterFromUrl(request.url, 'endDate') !== '2021-05-12' ||
+              getParameterFromUrl(request.url, 'status') !== 'processing' ||
+              getParameterFromUrl(request.url, 'limit') !== '100' ||
+              getParameterFromUrl(request.url, 'offset') !== '0'
+            ) {
+              throw new Error('Wrong request parameters');
+            }
+
+            validateMerchantTokenInUrl(responseResolver.request);
+            validateSignatureRequest(responseResolver.request);
+
+            return new Response(JSON.stringify(getSettlementsResponseMock));
           }
-
-          validateMerchantTokenInUrl(responseResolver.request);
-          validateSignatureRequest(responseResolver.request);
-
-          return new Response(JSON.stringify(getSettlementsResponseMock));
-        })
+        )
       );
 
       const params = {
@@ -1170,12 +1289,15 @@ describe('BitPaySDK.Client', () => {
 
     it('should get settlement', async () => {
       server.use(
-        http.get(host + '/settlements/DNFnN3fFjjzLn6if5bdGJC', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          validateMerchantTokenInUrl(responseResolver.request);
-          validateSignatureRequest(responseResolver.request);
+        http.get(
+          host + '/settlements/DNFnN3fFjjzLn6if5bdGJC',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            validateMerchantTokenInUrl(responseResolver.request);
+            validateSignatureRequest(responseResolver.request);
 
-          return new Response(JSON.stringify(getSettlementResponseMock));
-        })
+            return new Response(JSON.stringify(getSettlementResponseMock));
+          }
+        )
       );
 
       const result = await client.getSettlement('DNFnN3fFjjzLn6if5bdGJC');
@@ -1188,14 +1310,17 @@ describe('BitPaySDK.Client', () => {
     it('should get settlement reconciliation report', async () => {
       const token = '5T1T5yGDEtFDYe8jEVBSYLHKewPYXZrDLvZxtXBzn69fBbZYitYQYH4BFYFvvaVU7D';
       server.use(
-        http.get(host + '/settlements/RvNuCTMAkURKimwgvSVEMP/reconciliationreport', async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
-          if (getParameterFromUrl(responseResolver.request.url, 'token') !== token) {
-            throw new Error('Missing/wrong token');
-          }
-          validateSignatureRequest(responseResolver.request);
+        http.get(
+          host + '/settlements/RvNuCTMAkURKimwgvSVEMP/reconciliationreport',
+          async (responseResolver: ResponseResolverInfo<HttpRequestResolverExtras<PathParams>, DefaultBodyType>) => {
+            if (getParameterFromUrl(responseResolver.request.url, 'token') !== token) {
+              throw new Error('Missing/wrong token');
+            }
+            validateSignatureRequest(responseResolver.request);
 
-          return new Response(JSON.stringify(getSettlementReconciliationReportResponseMock));
-        })
+            return new Response(JSON.stringify(getSettlementReconciliationReportResponseMock));
+          }
+        )
       );
 
       const result = await client.getSettlementReconciliationReport('RvNuCTMAkURKimwgvSVEMP', token);
